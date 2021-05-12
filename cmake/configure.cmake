@@ -37,6 +37,7 @@ endif()
 if(WIN32)
   # windows header option for all targets.
   add_definitions(-D_XKEYCHECK_H)
+  add_definitions(/openmp)
   
   if (NOT MSVC)
     message(FATAL "Windows build only support msvc. Which was binded by the nvcc compiler of NVIDIA.")
@@ -90,6 +91,7 @@ if (WITH_MKLML AND MKLML_IOMP_LIB)
     set(CMAKE_CXX_CREATE_SHARED_LIBRARY_FORBIDDEN_FLAGS ${OPENMP_FLAGS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPENMP_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPENMP_FLAGS}")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SIMD_FLAG}")
@@ -167,8 +169,17 @@ if (LITE_WITH_OPENCL)
     add_definitions("-DLITE_WITH_OPENCL")
 endif()
 
+if (LITE_WITH_METAL)
+    add_definitions("-DLITE_WITH_METAL")
+endif()
+
+
 if (LITE_WITH_FPGA)
 add_definitions("-DLITE_WITH_FPGA")
+endif()
+
+if (LITE_WITH_INTEL_FPGA)
+add_definitions("-DLITE_WITH_INTEL_FPGA")
 endif()
 
 if (LITE_WITH_BM)

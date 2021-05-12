@@ -29,6 +29,9 @@
 #ifdef LITE_WITH_NVTX
 #include "lite/backends/cuda/nvtx_wrapper.h"
 #endif
+#ifdef LITE_WITH_OPENCL
+#include "lite/backends/opencl/cl_runtime.h"
+#endif
 
 namespace paddle {
 namespace lite {
@@ -115,6 +118,9 @@ struct Instruction {
 
   // Run the instruction.
   void Run();
+#ifdef LITE_WITH_METAL
+  void SaveOutput();
+#endif
 
   friend STL::ostream& operator<<(STL::ostream& os, const Instruction& other);
 
@@ -134,6 +140,16 @@ struct Instruction {
     }
   }
   void Sync() const { kernel_->mutable_context()->As<CUDAContext>().Sync(); }
+#endif
+
+#ifdef LITE_WITH_OPENCL
+  bool need_flush(const int inst_idx) const {
+    if (kernel_->target() == TargetType::kOpenCL && inst_idx % 10 == 0) {
+      return true;
+    }
+    return false;
+  }
+  void Flush() const { CLRuntime::Global()->command_queue().flush(); }
 #endif
 
 #ifdef LITE_WITH_PROFILE
@@ -158,7 +174,9 @@ struct Instruction {
   }
 
   void SetProfileRuntimeOpInfo(paddle::lite::profile::OpCharacter* ch) {
+    CHECK(ch != nullptr) << "OpCharacter should not be nullptr.";
     auto* op_lite = static_cast<paddle::lite::OpLite*>(ch->op_lite);
+    CHECK(op_lite != nullptr) << "op_lite should not be nullptr.";
     op_lite->GetOpRuntimeInfo(ch);
   }
 #endif
@@ -216,6 +234,9 @@ class LITE_API RuntimeProgram {
   }
 
   void Run();
+#ifdef LITE_WITH_METAL
+  void SaveOutput();
+#endif
 
   void set_exec_scope(Scope* x) { exec_scope_ = x; }
   Scope* exec_scope() { return exec_scope_; }
@@ -232,9 +253,11 @@ class LITE_API RuntimeProgram {
 
   size_t block_size() { return instructions_.size(); }
 
+#ifndef LITE_ON_TINY_PUBLISH
   // Update the ops and vars of all of blocks to the given program_desc
   // according to the instructions
   void SaveToProgram(std::shared_ptr<cpp::ProgramDesc> program_desc);
+#endif
 
  private:
   RuntimeProgram(const RuntimeProgram&) = delete;

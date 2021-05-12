@@ -15,6 +15,10 @@
 #pragma once
 
 #include "lite/utils/any.h"
+
+#ifdef LITE_WITH_METAL
+#include "lite/backends/metal/context.h"
+#endif
 #ifdef LITE_WITH_CUDA
 #include "lite/backends/cuda/context.h"
 #endif
@@ -65,6 +69,7 @@ using MLUContext = Context<TargetType::kMLU>;
 using RKNPUContext = Context<TargetType::kRKNPU>;
 using HuaweiAscendNPUContext = Context<TargetType::kHuaweiAscendNPU>;
 using ImaginationNNAContext = Context<TargetType::kImaginationNNA>;
+using IntelFPGAContext = Context<TargetType::kIntelFPGA>;
 
 template <>
 class Context<TargetType::kHost> {
@@ -327,6 +332,21 @@ class Context<TargetType::kFPGA> {
 };
 #endif
 
+#ifdef LITE_WITH_INTEL_FPGA
+// TODO(xbeu): add needed implementation to context
+template <>
+class Context<TargetType::kIntelFPGA> {
+ public:
+  void InitOnce() {}
+
+  IntelFPGAContext& operator=(const IntelFPGAContext& ctx) {}
+
+  void CopySharedTo(IntelFPGAContext* ctx) {}
+
+  std::string name() const { return "IntelFPGAContext"; }
+};
+#endif
+
 #ifdef LITE_WITH_MLU
 template <>
 class Context<TargetType::kMLU> {
@@ -541,10 +561,23 @@ class ContextScheduler {
             &ctx->As<OpenCLContext>());
         break;
 #endif
+#ifdef LITE_WITH_METAL
+      case TARGET(kMetal):
+        kernel_contexts_[TargetType::kMetal].As<ContextMetal>().CopySharedTo(
+            &ctx->As<ContextMetal>());
+        break;
+#endif
 #ifdef LITE_WITH_FPGA
       case TARGET(kFPGA):
         kernel_contexts_[TargetType::kFPGA].As<FPGAContext>().CopySharedTo(
             &ctx->As<FPGAContext>());
+        break;
+#endif
+#ifdef LITE_WITH_INTEL_FPGA
+      case TARGET(kIntelFPGA):
+        kernel_contexts_[TargetType::kIntelFPGA]
+            .As<IntelFPGAContext>()
+            .CopySharedTo(&ctx->As<IntelFPGAContext>());
         break;
 #endif
 #ifdef LITE_WITH_BM
@@ -599,8 +632,14 @@ class ContextScheduler {
 #ifdef LITE_WITH_OPENCL
     InitContext<TargetType::kOpenCL, OpenCLContext>();
 #endif
+#ifdef LITE_WITH_METAL
+    InitContext<TargetType::kMetal, ContextMetal>();
+#endif
 #ifdef LITE_WITH_FPGA
     InitContext<TargetType::kFPGA, FPGAContext>();
+#endif
+#ifdef LITE_WITH_INTEL_FPGA
+    InitContext<TargetType::kIntelFPGA, IntelFPGAContext>();
 #endif
 #ifdef LITE_WITH_NPU
     InitContext<TargetType::kNPU, NPUContext>();

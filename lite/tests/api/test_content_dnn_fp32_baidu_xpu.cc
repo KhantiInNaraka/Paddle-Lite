@@ -41,7 +41,7 @@ TEST(CONTENT_DNN, test_content_dnn_fp32_baidu_xpu) {
                            lite_api::Place{TARGET(kX86), PRECISION(kFloat)},
                            lite_api::Place{TARGET(kX86), PRECISION(kInt64)},
                            lite_api::Place{TARGET(kHost), PRECISION(kFloat)}});
-  config.set_xpu_workspace_l3_size_per_thread();
+  config.set_xpu_l3_cache_method(16773120, false);
   auto predictor = lite_api::CreatePaddlePredictor(config);
 
   std::string input_data_file =
@@ -107,7 +107,7 @@ TEST(CONTENT_DNN, test_content_dnn_fp32_baidu_xpu) {
 
   std::string ref_out_file = FLAGS_data_dir + std::string("/ref_out.txt");
   float out_accuracy = CalMmdnnOutAccuracy(out_rets, ref_out_file);
-  ASSERT_GT(out_accuracy, 0.99f);
+  ASSERT_GT(out_accuracy, 0.985f);
 }
 
 }  // namespace lite
