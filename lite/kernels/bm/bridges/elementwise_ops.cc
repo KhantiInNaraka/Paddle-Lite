@@ -25,6 +25,8 @@ namespace lite {
 namespace subgraph {
 namespace bm {
 
+using namespace bmcompiler;
+
 float* compute_elementwise_both_const(OpLite* op) {
   auto op_info = op->op_info();
   auto scope = op->scope();
@@ -221,3 +223,4 @@ REGISTER_SUBGRAPH_BRIDGE(elementwise_sub,
 REGISTER_SUBGRAPH_BRIDGE(elementwise_div,
                          kBM,
                          paddle::lite::subgraph::bm::ElementwiseConverter);
+

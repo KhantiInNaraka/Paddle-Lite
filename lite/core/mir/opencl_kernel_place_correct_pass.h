@@ -73,7 +73,7 @@ class OpenCLKernelPlaceCorrectPass : public ProgramPass {
           VLOG(4) << "Correct opencl softmax kernel place from device to host.";
 #if defined(LITE_WITH_ARM)
           auto new_target = TargetType::kARM;
-#elif defined(LITE_WITH_X86)
+#else
           auto new_target = TargetType::kX86;
 #endif
           UpdateTarget(inst, new_target);

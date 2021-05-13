@@ -28,6 +28,7 @@ namespace lite {
 namespace kernels {
 namespace bm {
 
+using namespace bmcompiler;
 bool SubgraphEngine::BuildDeviceProgram() {
   int status = 0;
   subgraph::bm::Graph graph;
@@ -47,6 +48,7 @@ bool SubgraphEngine::BuildDeviceProgram() {
     op->CheckShape();
     op->InferShape();
     std::string op_type = op->op_info()->Type();
+
     LOG(INFO) << op_type;
     if (!bridges.Exists(op_type, TARGET(kBM))) {
       return false;
@@ -58,6 +60,9 @@ bool SubgraphEngine::BuildDeviceProgram() {
                                              const_cast<KernelBase*>(kernel));
     if (subgraph::CHECK_FAILED(status)) {
       return false;
+    }
+    if (op_type == "conv2d") {
+     // break;
     }
   }
   std::string net_name = "bmnet_f32bmodel";
@@ -80,7 +85,7 @@ bool SubgraphEngine::BuildDeviceProgram() {
       graph.GetCompilerHandle(), const_cast<char*>(unique_net_name.c_str()), 1);
 #else
   __bmcompile_ir_opt(
-      graph.GetCompilerHandle(), const_cast<char*>(unique_net_name.c_str()), 1);
+      graph.GetCompilerHandle(), const_cast<char*>(unique_net_name.c_str()), 2);
 #endif
   void* bmodel_data = nullptr;
   unsigned int data_size = 0;

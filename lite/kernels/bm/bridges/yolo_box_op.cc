@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <bmcompiler_if.h>
+#include <bmcompiler_defs.h>
 #include <user_bmcpu_common.h>
 #include <iostream>
 #include <string>
@@ -25,6 +26,8 @@ namespace paddle {
 namespace lite {
 namespace subgraph {
 namespace bm {
+
+using namespace bmcompiler;
 
 // fixme: yolo box has updated, check arm kernel to get more info
 int YoloBoxConverter(void* ctx, OpLite* op, KernelBase* kernel) {
@@ -86,31 +89,39 @@ int YoloBoxConverter(void* ctx, OpLite* op, KernelBase* kernel) {
   int32_t* in_shape[2];
   int32_t in_dim[2];
   const char* in_name[2];
+  int in_type[2];
   in_shape[0] = &i_x_shape_data[0];
   in_shape[1] = &i_img_size_shape_data[0];
   in_dim[0] = x_dims.size();
   in_dim[1] = img_size_dims.size();
   in_name[0] = static_cast<const char*>(x_var_name.c_str());
   in_name[1] = static_cast<const char*>(img_size_var_name.c_str());
+  in_type[0] = DTYPE_FP32;
+  in_type[1] = DTYPE_INT32;
   int32_t* out_shape[2];
   int32_t out_dim[2];
   const char* out_name[2];
+  int out_type[2];
   out_shape[0] = &i_boxes_shape_data[0];
   out_shape[1] = &i_scores_shape_data[0];
   out_dim[0] = boxes_dims.size();
   out_dim[1] = scores_dims.size();
   out_name[0] = static_cast<const char*>(boxes_var_name.c_str());
   out_name[1] = static_cast<const char*>(scores_var_name.c_str());
+  out_type[0] = DTYPE_FP32;
+  out_type[1] = DTYPE_FP32;
 
-  add_user_cpu_layer(graph->GetCompilerHandle(),
+  add_user_cpu_layer_v2(graph->GetCompilerHandle(),
                      input_num,
+                     in_name,
                      in_shape,
                      in_dim,
-                     in_name,
+                     in_type,
                      output_num,
+                     out_name,
                      out_shape,
                      out_dim,
-                     out_name,
+                     out_type,
                      &bm_param,
                      static_cast<int>(sizeof(bm_param)));
   graph->AddNode(boxes_var_name);

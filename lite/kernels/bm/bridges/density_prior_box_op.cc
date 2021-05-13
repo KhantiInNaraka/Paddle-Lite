@@ -24,6 +24,8 @@ namespace lite {
 namespace subgraph {
 namespace bm {
 
+using namespace bmcompiler;
+
 typedef struct __tag_st_priorbox_param {
   std::vector<float> fixed_sizes;
   std::vector<float> fixed_ratios;

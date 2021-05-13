@@ -23,6 +23,8 @@ namespace lite {
 namespace subgraph {
 namespace bm {
 
+using namespace bmcompiler;
+
 int BatchNormConverter(void* ctx, OpLite* op, KernelBase* kernel) {
   CHECK(ctx != nullptr);
   CHECK(op != nullptr);
@@ -76,7 +78,6 @@ int BatchNormConverter(void* ctx, OpLite* op, KernelBase* kernel) {
     new_bias[c] = bias_data[c] - inv_scale * scale_data[c] * mean_data[c];
     new_scale[c] = inv_scale * scale_data[c];
   }
-
   const int input_num = 1;
   int** shape = new int*[input_num];
   int* dim = new int[input_num];

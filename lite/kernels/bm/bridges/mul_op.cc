@@ -22,6 +22,8 @@ namespace lite {
 namespace subgraph {
 namespace bm {
 
+using namespace bmcompiler;
+
 int MulConverter(void* ctx, OpLite* op, KernelBase* kernel) {
   CHECK(ctx != nullptr);
   CHECK(op != nullptr);

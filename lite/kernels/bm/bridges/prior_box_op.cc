@@ -23,6 +23,8 @@ namespace lite {
 namespace subgraph {
 namespace bm {
 
+using namespace bmcompiler;
+
 typedef struct __tag_st_priorbox_param {
   std::vector<float> min_sizes;
   std::vector<float> max_sizes;

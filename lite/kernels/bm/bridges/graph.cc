@@ -31,7 +31,7 @@ void Graph::CreateCompilerHandle() {
 #ifdef BM1682
   compiler_handle_ = create_bmcompiler("BM1682");
 #else
-  compiler_handle_ = create_bmcompiler("BM1684");
+  compiler_handle_ = bmcompiler::create_bmcompiler("BM1684");
 #endif
   CHECK(compiler_handle_ != nullptr);
 }

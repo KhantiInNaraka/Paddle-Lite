@@ -23,6 +23,8 @@ namespace lite {
 namespace subgraph {
 namespace bm {
 
+using namespace bmcompiler;
+
 bool CvtDtype(int dtype, int* ptype) {
   switch (dtype) {
     case 21:
