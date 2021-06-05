@@ -44,19 +44,31 @@ int InterpolateConverter(void* ctx, OpLite* op, KernelBase* kernel) {
   for (size_t i = 0; i < output_dims.size(); i++) {
     i_output_shape_data[i] = static_cast<int32_t>(output_dims[i]);
   }
-  auto scale = op_info->GetAttr<float>("scale");
-  int32_t i_scale = static_cast<int32_t>(scale);
+
+  int32_t i_scale = 0;
   bool is_int = false;
-  if ((scale - i_scale) < 0.000001f) {
-    is_int = true;
+  if (op_type != "nearest_interp_v2") {
+    auto scale = op_info->GetAttr<float>("scale");
+    i_scale = static_cast<int32_t>(scale);
+    if ((scale - i_scale) < 0.000001f) {
+      is_int = true;
+    }
+  } else {
+    auto scale = op_info->GetAttr<std::vector<float>>("scale");
+    i_scale = static_cast<int32_t>(scale[0]);
+    if ((scale[0] - i_scale) < 0.000001f) {
+      is_int = true;
+    }
   }
   int32_t type = 0;
   if (op_type == "nearest_interp") {
     type = 2;
+  } else if (op_type == "nearest_interp_v2") {
+    type = 5;
   } else {
     type = 0;
   }
-  is_int = false;
+  //is_int = false;
   if (type == 2 && is_int) {
     add_upsample_layer(graph->GetCompilerHandle(),
                        const_cast<const int*>(&i_x_shape_data[0]),
@@ -92,6 +104,9 @@ int InterpolateConverter(void* ctx, OpLite* op, KernelBase* kernel) {
 }  // namespace paddle
 
 REGISTER_SUBGRAPH_BRIDGE(nearest_interp,
+                         kBM,
+                         paddle::lite::subgraph::bm::InterpolateConverter);
+REGISTER_SUBGRAPH_BRIDGE(nearest_interp_v2,
                          kBM,
                          paddle::lite::subgraph::bm::InterpolateConverter);
 REGISTER_SUBGRAPH_BRIDGE(bilinear_interp,
