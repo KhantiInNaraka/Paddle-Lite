@@ -67,4 +67,10 @@ USE_SUBGRAPH_BRIDGE(swish, kBM);
 USE_SUBGRAPH_BRIDGE(hard_swish, kBM);
 USE_SUBGRAPH_BRIDGE(hard_sigmoid, kBM);
 USE_SUBGRAPH_BRIDGE(im2sequence, kBM);
-
+// dummy ops
+USE_SUBGRAPH_BRIDGE(rnn, kBM);
+USE_SUBGRAPH_BRIDGE(fill_constant_batch_size_like, kBM);
+USE_SUBGRAPH_BRIDGE(lstm, kBM);
+USE_SUBGRAPH_BRIDGE(top_k, kBM);
+USE_SUBGRAPH_BRIDGE(ctc_align, kBM);
+USE_SUBGRAPH_BRIDGE(matrix_nms, kBM);
