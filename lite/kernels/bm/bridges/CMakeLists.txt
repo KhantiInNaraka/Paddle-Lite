@@ -40,13 +40,23 @@ lite_cc_library(subgraph_bridge_act_enhance_op_bm SRCS act_enhance_op.cc DEPS ${
 lite_cc_library(subgraph_bridge_im2sequence_op_bm SRCS im2sequence_op.cc DEPS ${bm_subgraph_bridge_deps})
 
 #dummy ops
-lite_cc_library(subgraph_bridge_dummy_op_bm SRCS dummy_op.cc DEPS ${bm_subgraph_bridge_deps})
+#lite_cc_library(subgraph_bridge_dummy_op_bm SRCS dummy_op.cc DEPS ${bm_subgraph_bridge_deps})
+lite_cc_library(subgraph_bridge_lstm_op_bm SRCS lstm_op.cc DEPS ${bm_subgraph_bridge_deps})
+lite_cc_library(subgraph_bridge_rnn_op_bm SRCS rnn_op.cc DEPS ${bm_subgraph_bridge_deps})
+lite_cc_library(subgraph_bridge_ctc_align_op_bm SRCS ctc_align.cc DEPS ${bm_subgraph_bridge_deps})
+lite_cc_library(subgraph_bridge_topk_op_bm SRCS top_k.cc DEPS ${bm_subgraph_bridge_deps})
+lite_cc_library(subgraph_bridge_fill_constant_batch_size_like_op_bm SRCS fill_constant_batch_size_like_op.cc DEPS ${bm_subgraph_bridge_deps})
 
 set(bm_subgraph_bridges
         subgraph_bridge_registry
         subgraph_bridge_graph_bm
         # dummy ops
-        subgraph_bridge_dummy_op_bm
+        #subgraph_bridge_dummy_op_bm
+        subgraph_bridge_lstm_op_bm
+        subgraph_bridge_rnn_op_bm
+        subgraph_bridge_ctc_align_op_bm
+        subgraph_bridge_topk_op_bm
+        subgraph_bridge_fill_constant_batch_size_like_op_bm
         subgraph_bridge_im2sequence_op_bm
         subgraph_bridge_act_op_bm
         subgraph_bridge_conv_op_bm

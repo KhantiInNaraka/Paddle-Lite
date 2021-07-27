@@ -42,6 +42,9 @@ bool SubgraphEngine::BuildDeviceProgram() {
     BuildOriginProgram();
   }
   const auto& insts = origin_program_->instructions(kRootBlockIdx);
+#if 0
+  int id = 0;
+#endif
   for (auto& inst : insts) {
     auto op = const_cast<OpLite*>(inst.op());
     CHECK(op);
@@ -50,6 +53,18 @@ bool SubgraphEngine::BuildDeviceProgram() {
     std::string op_type = op->op_info()->Type();
 
     LOG(INFO) << op_type;
+#if 0
+    if(op_type=="im2sequence"){
+        id+=1;
+        break;
+    }
+    if(id==1&&op_type=="im2sequence"){
+        continue;
+    }
+    if(id>1){
+        break;
+    }
+#endif
     if (!bridges.Exists(op_type, TARGET(kBM))) {
       return false;
     }
