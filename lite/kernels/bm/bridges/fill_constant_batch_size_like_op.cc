@@ -26,41 +26,41 @@ namespace bm {
 using namespace bmcompiler;
 
 int FillConstantBatchSizeLikeConverter(void* ctx, OpLite* op, KernelBase* kernel) {
- // std::cout<<"active fill_constant_batch_size_like"<<std::endl;
- // CHECK(ctx != nullptr);
- // CHECK(op != nullptr);
- // auto graph = static_cast<Graph*>(ctx);
- // auto op_info = op->op_info();
- // auto op_type = op_info->Type();
- // auto scope = op->scope();
- // VLOG(3) << "[NPU] Converting " + op_type + "...";
+  std::cout<<"active fill_constant_batch_size_like"<<std::endl;
+  CHECK(ctx != nullptr);
+  CHECK(op != nullptr);
+  auto graph = static_cast<Graph*>(ctx);
+  auto op_info = op->op_info();
+  auto op_type = op_info->Type();
+  auto scope = op->scope();
+  VLOG(3) << "[NPU] Converting " + op_type + "...";
 
- // // Get input, output and op attributes
- // auto x_name = op_info->Input("Input").front();
- // auto x = scope->FindTensor(x_name);
- // auto x_dims = x->dims();
- // const int64_t* input_shape_data = const_cast<const int64_t*>(&x_dims.data()[0]);
- // std::vector<int> i_x_shape_data(x_dims.size());
- // for (size_t i = 0; i < x_dims.size(); i++) {
- //   i_x_shape_data[i] = static_cast<int>(input_shape_data[i]);
- //   std::cout<<i_x_shape_data[i]<<std::endl;
- // }
+  // Get input, output and op attributes
+  auto x_name = op_info->Input("Input").front();
+  auto x = scope->FindTensor(x_name);
+  auto x_dims = x->dims();
+  const int64_t* input_shape_data = const_cast<const int64_t*>(&x_dims.data()[0]);
+  std::vector<int> i_x_shape_data(x_dims.size());
+  for (size_t i = 0; i < x_dims.size(); i++) {
+    i_x_shape_data[i] = static_cast<int>(input_shape_data[i]);
+    std::cout<<i_x_shape_data[i]<<std::endl;
+  }
 
 
- // auto out_name = op_info->Output("Out").front();
- // auto out = scope->FindTensor(out_name);
- // auto out_shape = out->dims().Vectorize();
+  auto out_name = op_info->Output("Out").front();
+  auto out = scope->FindTensor(out_name);
+  auto out_shape = out->dims().Vectorize();
 
- // auto value = op_info->GetAttr<float>("value");
- // std::cout<<"value: "<<value<<std::endl;
- //
- // std::string str = x_name+"@shape";
- // add_shape_ref_layer(graph->GetCompilerHandle(), static_cast<const char*>(x_name.c_str()),
- //         const_cast<const int*>(&i_x_shape_data[0]), x_dims.size(), static_cast<const char*>(str.c_str()));
- // add_constant_fill_layer_v2(graph->GetCompilerHandle(), static_cast<const char*>(str.c_str()),
- //         static_cast<const char*>(out_name.c_str()),static_cast<const void*>(&value),DTYPE_INT32);
+  auto value = op_info->GetAttr<float>("value");
+  std::cout<<"value: "<<value<<std::endl;
+ 
+  std::string str = x_name+"@shape";
+  add_shape_ref_layer(graph->GetCompilerHandle(), static_cast<const char*>(x_name.c_str()),
+          const_cast<const int*>(&i_x_shape_data[0]), x_dims.size(), static_cast<const char*>(str.c_str()));
+  add_constant_fill_layer_v2(graph->GetCompilerHandle(), static_cast<const char*>(str.c_str()),
+          static_cast<const char*>(out_name.c_str()),static_cast<const void*>(&value),DTYPE_FP32);
 
- // graph->AddNode(out_name);
+  graph->AddNode(out_name);
 
 
   return SUCCESS;
