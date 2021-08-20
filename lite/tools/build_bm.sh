@@ -45,7 +45,7 @@ function prepare_thirdparty {
 
     # clone bmlibs
     if [ ! -d ${workspace}/third-party/bmlibs ]; then
-        git clone https://github.com/AnBaolei1984/bmlibs.git ${workspace}/third-party/bmlibs
+        git clone https://github.com/KhantiInNaraka/bmlibs.git ${workspace}/third-party/bmlibs
     fi
 }
 
