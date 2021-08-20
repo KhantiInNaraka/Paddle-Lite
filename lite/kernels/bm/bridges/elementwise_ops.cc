@@ -19,6 +19,7 @@
 #include "lite/core/subgraph_bridge_registry.h"
 #include "lite/kernels/bm/bridges/graph.h"
 #include "lite/kernels/bm/bridges/utility.h"
+#include <assert.h>
 
 namespace paddle {
 namespace lite {
@@ -83,6 +84,7 @@ int ElementwiseConverter(void* ctx, OpLite* op, KernelBase* kernel) {
   const char** name = new const char*[input_num];
   auto x_var_name = op_info->Input("X").front();
   auto x = scope->FindVar(x_var_name)->GetMutable<lite::Tensor>();
+  assert(x->data<float>()==nullptr);
   auto x_dims = x->dims();
   name[0] = static_cast<const char*>(x_var_name.c_str());
   dim[0] = x_dims.size();
@@ -94,6 +96,7 @@ int ElementwiseConverter(void* ctx, OpLite* op, KernelBase* kernel) {
   bool x_is_const = !graph->HasNode(x_var_name);
   auto y_var_name = op_info->Input("Y").front();
   auto y = scope->FindVar(y_var_name)->GetMutable<lite::Tensor>();
+  assert(y->data<float>()==nullptr);
   auto y_dims = y->dims();
   name[1] = static_cast<const char*>(y_var_name.c_str());
   dim[1] = y_dims.size();
@@ -113,7 +116,7 @@ int ElementwiseConverter(void* ctx, OpLite* op, KernelBase* kernel) {
   for (size_t i = 0; i < output_dims.size(); i++) {
     i_output_shape_data[i] = static_cast<int>(output_shape_data[i]);
   }
-  auto axis = op_info->GetAttr<int>("axis");
+  int axis1 = op_info->GetAttr<int>("axis");
   int op_code{-1};
   if (op_type == "elementwise_mul") {
     op_code = BINARY_MUL;
@@ -147,7 +150,7 @@ int ElementwiseConverter(void* ctx, OpLite* op, KernelBase* kernel) {
                             dim[1],
                             static_cast<bm_data_type_t>(DTYPE_FP32),
                             static_cast<const void*>(y_data));
-      } else if (1 == dim[1] && 1 == axis) {
+      } else if (1 == dim[1] && 1 == axis1) {
         add_expand_ndims_layer(
             graph->GetCompilerHandle(),
             name[1],
@@ -164,6 +167,7 @@ int ElementwiseConverter(void* ctx, OpLite* op, KernelBase* kernel) {
         i_expand_shape_data.push_back(1);
         shape[1] = &i_expand_shape_data[0];
         y_data = nullptr;
+        y_is_const = false;
       }
     } else {
       if (dim[1] < dim[0]) {
@@ -189,12 +193,12 @@ int ElementwiseConverter(void* ctx, OpLite* op, KernelBase* kernel) {
                         name[0],
                         shape[0],
                         dim[0],
-                        0,
+                        (x_is_const?1:0),
                         static_cast<const float*>(x_data),
                         name[1],
                         shape[1],
                         dim[1],
-                        0,
+                        (y_is_const?1:0),
                         static_cast<const float*>(y_data),
                         static_cast<const char*>(output_var_name.c_str()),
                         op_code);

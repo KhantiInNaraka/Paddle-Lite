@@ -17,6 +17,7 @@
 #include "lite/core/subgraph_bridge_registry.h"
 #include "lite/kernels/bm/bridges/graph.h"
 #include "lite/kernels/bm/bridges/utility.h"
+#include <assert.h>
 
 namespace paddle {
 namespace lite {
@@ -49,6 +50,8 @@ int MatMulConverter(void* ctx, OpLite* op, KernelBase* kernel) {
   for (size_t i = 0; i < y_dims.size(); i++) {
     i_y_shape_data[i] = static_cast<int>(y_dims[i]);
   }
+  bool x_is_const = !graph->HasNode(x_var_name);
+  bool y_is_const = !graph->HasNode(y_var_name);
   // output
   auto output_var_name = op_info->Output("Out").front();
   auto out = scope->FindVar(output_var_name)->GetMutable<lite::Tensor>();
@@ -70,12 +73,12 @@ int MatMulConverter(void* ctx, OpLite* op, KernelBase* kernel) {
                          static_cast<const char*>(x_var_name.c_str()),
                          const_cast<const int*>(&i_x_shape_data[0]),
                          x_dims.size(),
-                         0,
+                         (x_is_const?1:0),
                          x_data,
                          static_cast<const char*>(y_var_name.c_str()),
                          const_cast<const int*>(&i_y_shape_data[0]),
                          y_dims.size(),
-                         0,
+                         (y_is_const?1:0),
                          y_data,
                          static_cast<const char*>(output_var_name.c_str()));
   graph->AddNode(output_var_name);

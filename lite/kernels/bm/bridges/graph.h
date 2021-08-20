@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <bmcompiler_if_lite.h>
 #include <pthread.h>
 #include <map>
 #include <memory>

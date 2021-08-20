@@ -54,16 +54,16 @@ bool SubgraphEngine::BuildDeviceProgram() {
 
     LOG(INFO) << op_type;
 #if 0
-    if(op_type=="im2sequence"){
+    if(id>=1){
+        break;
+    }
+    if(op_type=="rnn"){
         id+=1;
-        break;
+        //break;
     }
-    if(id==1&&op_type=="im2sequence"){
-        continue;
-    }
-    if(id>1){
-        break;
-    }
+//    if(id==1&&op_type=="transpose2"){
+//        continue;
+//    }
 #endif
     if (!bridges.Exists(op_type, TARGET(kBM))) {
       return false;
@@ -76,6 +76,13 @@ bool SubgraphEngine::BuildDeviceProgram() {
     if (subgraph::CHECK_FAILED(status)) {
       return false;
     }
+    auto op_info = op->op_info();
+    op_info->output_names();
+    for (auto& name : op_info->output_names()) {
+        if (!graph.HasNode(name)) {
+            bm_disable_output(graph.GetCompilerHandle(), name.c_str());
+        }
+    }
   }
   std::string net_name = "bmnet_f32bmodel";
   auto unique_net_name = lite::subgraph::bm::UniqueName(net_name);
@@ -87,8 +94,16 @@ bool SubgraphEngine::BuildDeviceProgram() {
   exit(1);
 #endif
 #if (defined BM_SAVE_BMODEL)
+  set_bmcompiler_profile(graph.GetCompilerHandle(), true);
+
+#define STATIC_COMPILE
+#ifndef STATIC_COMPILE
+  __bmcompile_ir_opt(
+      graph.GetCompilerHandle(), const_cast<char*>(unique_net_name.c_str()), 2);
+#else
   __bmcompile_opt(
       graph.GetCompilerHandle(), const_cast<char*>(unique_net_name.c_str()), 2);
+#endif
   finish_bmcompiler(graph.GetCompilerHandle());
   LOG(INFO) << "=========================save bmodel success";
   exit(1);

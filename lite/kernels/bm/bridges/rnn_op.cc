@@ -73,7 +73,7 @@ static inline void trans(const float *src, float *dst, int X, int H) {
              for (int x = 0; x < X; ++x)
                  dst[x * H + h] = src[h * X + x];
         src += X * H;
-         dst += X * H;
+        dst += X * H;
      }
  }
 
@@ -145,7 +145,6 @@ int RnnConverter(void* ctx, OpLite* op, KernelBase* kernel) {
   float * witer = weight;
   
   for(int i=0;i<weight_len/(has_bias ? 2 : 1);i++){
-
     auto x = weight_list[i].t;
     auto x_dims = x->dims();
     const int64_t* input_shape_data = const_cast<const int64_t*>(&x_dims.data()[0]);
@@ -157,10 +156,19 @@ int RnnConverter(void* ctx, OpLite* op, KernelBase* kernel) {
       std::cout<<i_x_shape_data[i]<<" : "<<std::endl;
       //tensor_size *= i_x_shape_data[i];
     }
-
+    
+    //float* new_weight = new float[4*hidden_size * i_x_shape_data[1]];
+    //memcpy(new_weight, data + hidden_size*i_x_shape_data[1], sizeof(float)*2*hidden_size*i_x_shape_data[1]);
+    //memcpy(new_weight + 2*hidden_size*i_x_shape_data[1], data, sizeof(float)*hidden_size * i_x_shape_data[1]);
+    //memcpy(new_weight + 3*hidden_size*i_x_shape_data[1], data + 3*hidden_size*i_x_shape_data[1], sizeof(float)*hidden_size*i_x_shape_data[1]);
+    //memcpy(new_weight, data, sizeof(float) * 2 * hidden_size * i_x_shape_data[1]);
+    //memcpy(new_weight + 2*hidden_size*i_x_shape_data[1], data + 3*hidden_size*i_x_shape_data[1], sizeof(float)*hidden_size*i_x_shape_data[1]);
+    //memcpy(new_weight+3*hidden_size*i_x_shape_data[1], data+2*hidden_size*i_x_shape_data[1], sizeof(float)*hidden_size*i_x_shape_data[1]);
+    //trans(new_weight, witer, i_x_shape_data[1], hidden_size);
 
     trans(data, witer, i_x_shape_data[1], hidden_size);
     witer += 4*hidden_size*i_x_shape_data[1];
+    //delete [] new_weight;
   }
 
   float * biter = bias;
@@ -168,8 +176,19 @@ int RnnConverter(void* ctx, OpLite* op, KernelBase* kernel) {
     auto x = weight_list[i].t;
     auto x_dims = x->dims();
     auto data = x->data<float>();
-    memcpy(biter,data,4*hidden_size);
+
+    //float* new_bias = new float[4*hidden_size];
+    //memcpy(new_bias, data + hidden_size, sizeof(float)*2*hidden_size);
+    //memcpy(new_bias + 2*hidden_size, data, sizeof(float)*hidden_size);
+    //memcpy(new_bias+3*hidden_size, data+3*hidden_size, sizeof(float)*hidden_size);
+    //memcpy(new_bias, data, 2*hidden_size*sizeof(float));
+    //memcpy(new_bias+2*hidden_size, data+3*hidden_size, sizeof(float)*hidden_size);
+    //memcpy(new_bias+3*hidden_size, data+2*hidden_size, sizeof(float)*hidden_size);
+    //memcpy(biter,new_bias,4*hidden_size*sizeof(float));
+
+    memcpy(biter,data,4*hidden_size*sizeof(float));
     biter += 4*hidden_size;
+    //delete [] new_bias;
   }
 
 #if 0
@@ -201,7 +220,7 @@ int RnnConverter(void* ctx, OpLite* op, KernelBase* kernel) {
                       const_cast<const int*>(&out_param[0].i_x_shape_data[0]),out_param[0].dims_size,out_param[0].name.c_str(),
                       const_cast<const int*>(&out_state_param[0].i_x_shape_data[0]),out_state_param[0].dims_size,out_state_param[0].name.c_str(),
                       const_cast<const int*>(&out_state_param[1].i_x_shape_data[0]),out_state_param[1].dims_size,out_state_param[1].name.c_str(),
-                      witer,biter,is_bidirec,true,num_layers,
+                      weight,bias,is_bidirec,false,num_layers,
                       node_name.c_str());
 
   delete [] weight;
